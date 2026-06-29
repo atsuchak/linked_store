@@ -34,7 +34,8 @@ export function LinkInputForm() {
           body: JSON.stringify({ url: formattedUrl, title, description }),
         });
         if (res.ok) {
-          console.log("Link saved to DB");
+          const savedLink = await res.json();
+          addLocalLink(savedLink);
         }
       } catch (error) {
         console.error("Failed to save link", error);
