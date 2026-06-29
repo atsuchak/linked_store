@@ -10,7 +10,7 @@ export function SyncLinks() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetch("/api/links")
+      fetch("/api/links", { cache: "no-store", next: { revalidate: 0 } })
         .then((res) => {
           if (res.ok) return res.json();
           throw new Error("Failed to fetch links");
