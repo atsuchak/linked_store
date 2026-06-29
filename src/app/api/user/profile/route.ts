@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 
 export async function GET() {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -34,7 +35,7 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     if (!session || !session.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }

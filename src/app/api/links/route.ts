@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import LinkModel from "@/models/Link";
 import mongoose from "mongoose";
@@ -9,8 +10,8 @@ import { encrypt, decrypt } from "@/lib/encryption";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
-    if (!session || !session.user) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -45,8 +46,8 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession();
-    if (!session || !session.user) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
