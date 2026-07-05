@@ -16,7 +16,7 @@ const DraggableLinkCard = ({ link, removeLocalLink, updateLocalLink, search }: a
   return (
     <Reorder.Item value={link} dragListener={false} dragControls={controls} className="flex gap-3 relative w-full min-w-0 select-none">
       <div 
-        className="flex flex-col justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-indigo-500 px-1 transition-colors"
+        className="flex flex-col justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-indigo-500 px-1 transition-colors touch-none"
         onPointerDown={(e) => controls.start(e)}
         title="Drag to reorder"
       >
