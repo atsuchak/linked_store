@@ -36,6 +36,12 @@ export function SyncLinks() {
           
           const data = await res.json();
           setLocalLinks(data);
+
+          const historyRes = await fetch("/api/user/history-order", { cache: "no-store", next: { revalidate: 0 } });
+          if (historyRes.ok) {
+             const historyData = await historyRes.json();
+             useLinkStore.getState().setHistoryOrder(historyData.historyOrder || []);
+          }
         } catch (error) {
           console.error("Sync error:", error);
         }

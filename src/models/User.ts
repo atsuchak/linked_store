@@ -8,6 +8,7 @@ export interface IUser extends Document {
   image?: string;
   sessionVersion: number;
   createdAt: Date;
+  historyOrder?: string[];
 }
 
 const UserSchema: Schema = new Schema({
@@ -19,7 +20,7 @@ const UserSchema: Schema = new Schema({
   },
   password: {
     type: String,
-    select: false, // Don't return password by default
+    select: false,
   },
   name: {
     type: String,
@@ -38,9 +39,12 @@ const UserSchema: Schema = new Schema({
     type: Date,
     default: Date.now,
   },
+  historyOrder: {
+    type: [String],
+    default: [],
+  },
 });
 
-// Delete the cached model in development to ensure schema updates are applied
 if (process.env.NODE_ENV === 'development' && mongoose.models.User) {
   delete mongoose.models.User;
 }

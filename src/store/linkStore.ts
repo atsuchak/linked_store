@@ -7,6 +7,7 @@ export interface LocalLink {
   title?: string;
   description?: string;
   createdAt: number;
+  isPinned?: boolean;
 }
 
 interface LinkState {
@@ -16,12 +17,17 @@ interface LinkState {
   updateLocalLink: (id: string, updatedLink: Partial<Omit<LocalLink, 'id' | 'createdAt'>>) => void;
   clearLocalLinks: () => void;
   setLocalLinks: (links: LocalLink[]) => void;
+  historyOrder: string[];
+  setHistoryOrder: (order: string[]) => void;
+  resetHistoryOrder: () => void;
+  togglePinLocalLink: (id: string) => void;
 }
 
 export const useLinkStore = create<LinkState>()(
   persist(
     (set) => ({
       localLinks: [],
+      historyOrder: [],
       addLocalLink: (link) =>
         set((state) => ({
           localLinks: [
@@ -52,6 +58,23 @@ export const useLinkStore = create<LinkState>()(
             createdAt: new Date(link.createdAt).getTime()
           }))
         }),
+      setHistoryOrder: (order) => set({ historyOrder: order }),
+      resetHistoryOrder: () => set({ historyOrder: [] }),
+      togglePinLocalLink: (id) => set((state) => {
+        const link = state.localLinks.find(l => l.id === id);
+        if (!link) return state;
+        
+        if (!link.isPinned) {
+          const pinnedCount = state.localLinks.filter(l => l.isPinned).length;
+          if (pinnedCount >= 4) {
+            alert("You can only pin up to 4 links.");
+            return state;
+          }
+        }
+        
+        const updatedLinks = state.localLinks.map(l => l.id === id ? { ...l, isPinned: !l.isPinned } : l);
+        return { localLinks: updatedLinks };
+      }),
     }),
     {
       name: 'link-storage', // name of the item in the storage (must be unique)

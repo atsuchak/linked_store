@@ -6,6 +6,7 @@ export interface ILink extends Document {
   description?: string;
   userId: mongoose.Types.ObjectId;
   createdAt: Date;
+  isPinned?: boolean;
 }
 
 const LinkSchema: Schema = new Schema({
@@ -28,6 +29,15 @@ const LinkSchema: Schema = new Schema({
     type: Date,
     default: Date.now,
   },
+  isPinned: {
+    type: Boolean,
+    default: false,
+  },
 });
+
+// Delete the cached model in development to ensure schema updates are applied
+if (process.env.NODE_ENV === 'development' && mongoose.models.Link) {
+  delete mongoose.models.Link;
+}
 
 export default mongoose.models.Link || mongoose.model<ILink>('Link', LinkSchema);
