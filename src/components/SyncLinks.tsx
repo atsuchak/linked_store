@@ -1,24 +1,47 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useLinkStore } from "@/store/linkStore";
 
 export function SyncLinks() {
   const { status } = useSession();
   const { setLocalLinks } = useLinkStore();
+  const hasSynced = useRef(false);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/links", { cache: "no-store", next: { revalidate: 0 } })
-        .then((res) => {
-          if (res.ok) return res.json();
-          throw new Error("Failed to fetch links");
-        })
-        .then((data) => {
+    if (status === "authenticated" && !hasSynced.current) {
+      hasSynced.current = true;
+      
+      const performSync = async () => {
+        try {
+          const currentLinks = useLinkStore.getState().localLinks;
+          // Local links added while logged out have a UUID (length 36, contains hyphens)
+          // MongoDB ObjectIds are 24-character hex strings.
+          const unsyncedLinks = currentLinks.filter(
+            (link) => link.id.includes('-') || link.id.length !== 24
+          );
+
+          if (unsyncedLinks.length > 0) {
+            await fetch("/api/links/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ links: unsyncedLinks }),
+            });
+          }
+
+          // Fetch the updated list of links from the database
+          const res = await fetch("/api/links", { cache: "no-store", next: { revalidate: 0 } });
+          if (!res.ok) throw new Error("Failed to fetch links");
+          
+          const data = await res.json();
           setLocalLinks(data);
-        })
-        .catch(console.error);
+        } catch (error) {
+          console.error("Sync error:", error);
+        }
+      };
+
+      performSync();
     }
   }, [status, setLocalLinks]);
 
