@@ -6,6 +6,7 @@ export interface IUser extends Document {
   name?: string;
   phone?: string;
   image?: string;
+  sessionVersion: number;
   createdAt: Date;
 }
 
@@ -29,10 +30,19 @@ const UserSchema: Schema = new Schema({
   image: {
     type: String,
   },
+  sessionVersion: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+// Delete the cached model in development to ensure schema updates are applied
+if (process.env.NODE_ENV === 'development' && mongoose.models.User) {
+  delete mongoose.models.User;
+}
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

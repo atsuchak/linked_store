@@ -35,7 +35,8 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
-        };
+          sessionVersion: user.sessionVersion,
+        } as any;
       },
     }),
   ],
@@ -46,13 +47,36 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.sessionVersion = (user as any).sessionVersion || 0;
+        console.log("JWT callback initialized for user:", token.id, "version:", token.sessionVersion);
       }
+
+      if (token.id) {
+        await connectDB();
+        const dbUser = await User.findById(token.id).select('sessionVersion');
+        if (!dbUser) {
+          console.log("JWT check failed: user not found in DB");
+          token.error = "InvalidSession";
+          return token;
+        }
+        if ((dbUser.sessionVersion || 0) !== (token.sessionVersion || 0)) {
+          console.log("JWT check failed: session version mismatch. DB:", dbUser.sessionVersion, "Token:", token.sessionVersion);
+          token.error = "InvalidSession";
+          return token;
+        }
+      } else if (token.error) {
+         console.log("JWT has existing error:", token.error);
+      }
+
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
+      if (token?.error === "InvalidSession") {
+        session.error = token.error;
+      } else if (token && session.user && token.id) {
         session.user.id = token.id as string;
       }
+      
       return session;
     },
   },
