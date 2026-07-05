@@ -16,6 +16,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editUrl, setEditUrl] = useState(link.url);
   const [editTitle, setEditTitle] = useState(link.title || "");
   const [editDesc, setEditDesc] = useState(link.description || "");
@@ -27,10 +28,20 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDelete) onDelete(link.id || link._id);
+    setIsDeleteModalOpen(true);
     setIsModalOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await fetch(`/api/links/${link.id || link._id}`, { method: "DELETE" });
+    } catch (err) {
+      console.error(err);
+    }
+    if (onDelete) onDelete(link.id || link._id);
+    setIsDeleteModalOpen(false);
   };
 
   const handleEditStart = (e: React.MouseEvent) => {
@@ -39,12 +50,23 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
     setIsModalOpen(false); // Close modal if open when starting edit
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    let formattedUrl = editUrl.trim();
+    if (!/^https?:\/\//i.test(formattedUrl)) {
+      formattedUrl = "https://" + formattedUrl;
+    }
+
+    try {
+      await fetch(`/api/links/${link.id || link._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: formattedUrl, title: editTitle, description: editDesc }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
     if (onEdit) {
-      let formattedUrl = editUrl.trim();
-      if (!/^https?:\/\//i.test(formattedUrl)) {
-        formattedUrl = "https://" + formattedUrl;
-      }
       onEdit(link.id || link._id, { url: formattedUrl, title: editTitle, description: editDesc });
     }
     setIsEditing(false);
@@ -140,7 +162,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               )}
               {onDelete && (
                 <button
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
                   title="Delete Link"
                 >
@@ -242,7 +264,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
                     )}
                     {onDelete && (
                       <button
-                        onClick={handleDelete}
+                        onClick={handleDeleteClick}
                         className="p-2.5 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 bg-slate-100 hover:bg-red-50 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl transition-colors border border-slate-200 dark:border-white/10"
                         title="Delete Link"
                       >
@@ -250,6 +272,50 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
                       </button>
                     )}
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm z-[60] p-6"
+            >
+              <div className="bg-white dark:bg-slate-900 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 relative flex flex-col items-center text-center">
+                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-4">
+                  <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Link</h2>
+                <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
+                  Are you sure you want to delete this link? This action cannot be undone.
+                </p>
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 rounded-xl font-medium transition-colors border border-slate-200 dark:border-white/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDelete}
+                    className="flex-1 py-2.5 px-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </motion.div>

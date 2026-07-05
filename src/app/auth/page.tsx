@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, ArrowRight, KeyRound } from "lucide-react";
+import { Mail, Lock, ArrowRight, KeyRound, Eye, EyeOff } from "lucide-react";
 import { BackgroundEffects } from "@/components/BackgroundEffects";
 
 export default function AuthPage() {
@@ -18,6 +18,8 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSendOtp = async () => {
     if (!email) {
@@ -120,6 +122,8 @@ export default function AuthPage() {
     setOtpSent(false);
     setError("");
     setSuccess("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   return (
@@ -204,13 +208,20 @@ export default function AuthPage() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 bg-black/10 dark:bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500/50 transition-all text-slate-900 dark:text-white"
+                    className="w-full pl-11 pr-11 py-3 bg-black/10 dark:bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500/50 transition-all text-slate-900 dark:text-white"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
             )}
@@ -221,13 +232,20 @@ export default function AuthPage() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 bg-black/10 dark:bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500/50 transition-all text-slate-900 dark:text-white"
+                    className="w-full pl-11 pr-11 py-3 bg-black/10 dark:bg-black/40 border border-white/10 rounded-xl focus:outline-none focus:border-indigo-500/50 transition-all text-slate-900 dark:text-white"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
             )}
