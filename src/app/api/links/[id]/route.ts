@@ -48,11 +48,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const { id } = await params;
-    const { url, title, description } = await req.json();
-
-    if (!url) {
-      return NextResponse.json({ message: "URL is required" }, { status: 400 });
-    }
+    const { url, title, description, isPinned } = await req.json();
 
     if (id.length !== 24 || id.includes('-')) {
        return NextResponse.json({ message: "Link updated locally" }, { status: 200 });
@@ -60,16 +56,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     await connectDB();
 
+    const updateData: any = {};
+    if (url !== undefined) updateData.url = encrypt(url);
+    if (title !== undefined) updateData.title = title ? encrypt(title) : title;
+    if (description !== undefined) updateData.description = description ? encrypt(description) : description;
+    if (isPinned !== undefined) updateData.isPinned = isPinned;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ message: "No data to update" }, { status: 400 });
+    }
+
     const updatedLink = await LinkModel.findOneAndUpdate(
       {
         _id: new mongoose.Types.ObjectId(id),
         userId: new mongoose.Types.ObjectId(session.user.id),
       },
-      {
-        url: encrypt(url),
-        title: title ? encrypt(title) : title,
-        description: description ? encrypt(description) : description,
-      },
+      { $set: updateData },
       { new: true }
     );
 

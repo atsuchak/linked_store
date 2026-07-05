@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { url, title, description } = await req.json();
+    const { url, title, description, isPinned } = await req.json();
 
     if (!url) {
       return NextResponse.json({ message: "URL is required" }, { status: 400 });
@@ -28,13 +28,15 @@ export async function POST(req: Request) {
       title: title ? encrypt(title) : title,
       description: description ? encrypt(description) : description,
       userId: new mongoose.Types.ObjectId(session.user.id),
+      isPinned: isPinned || false,
     });
 
     const responseLink = {
       ...newLink.toObject(),
       url,
       title,
-      description
+      description,
+      isPinned: newLink.isPinned
     };
 
     return NextResponse.json(responseLink, { status: 201 });

@@ -34,6 +34,7 @@ export async function POST(req: Request) {
           description: link.description ? encrypt(link.description) : link.description,
           userId: userId,
           createdAt: link.createdAt ? new Date(link.createdAt) : new Date(),
+          isPinned: link.isPinned || false,
         });
       }
     }
