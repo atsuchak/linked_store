@@ -40,7 +40,18 @@ export function SyncLinks() {
           const historyRes = await fetch("/api/user/history-order", { cache: "no-store", next: { revalidate: 0 } });
           if (historyRes.ok) {
              const historyData = await historyRes.json();
-             useLinkStore.getState().setHistoryOrder(historyData.historyOrder || []);
+             const localHistoryOrder = useLinkStore.getState().historyOrder;
+             
+             if (historyData.historyOrder && historyData.historyOrder.length > 0) {
+               useLinkStore.getState().setHistoryOrder(historyData.historyOrder);
+             } else if (localHistoryOrder && localHistoryOrder.length > 0) {
+               // Push local to DB if DB is empty but local is not
+               fetch("/api/user/history-order", {
+                 method: "PUT",
+                 headers: { "Content-Type": "application/json" },
+                 body: JSON.stringify({ historyOrder: localHistoryOrder })
+               }).catch(console.error);
+             }
           }
         } catch (error) {
           console.error("Sync error:", error);
