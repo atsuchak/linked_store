@@ -1,9 +1,10 @@
 "use client";
 
-import { ExternalLink, Copy, CheckCircle2, Trash2, Edit2, Check, X, Maximize2 } from "lucide-react";
+import { ExternalLink, Copy, CheckCircle2, Trash2, Edit2, Check, X, Maximize2, Pin } from "lucide-react";
 import { useState } from "react";
 import { LocalLink } from "@/store/linkStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLinkStore } from "@/store/linkStore";
 
 interface LinkCardProps {
   link: LocalLink | any;
@@ -11,6 +12,18 @@ interface LinkCardProps {
   onEdit?: (id: string, updatedLink: Partial<LocalLink>) => void;
   searchTerm?: string;
 }
+
+const formatAutoTitle = (urlStr: string) => {
+  try {
+    const url = new URL(urlStr);
+    const domain = url.hostname.replace(/^www\./, '');
+    const segments = url.pathname.split('/').filter(Boolean);
+    const firstSegment = segments.length > 0 ? `/${segments[0]}` : '';
+    return `${domain}${firstSegment}`;
+  } catch {
+    return urlStr.replace(/^https?:\/\/(www\.)?/, "");
+  }
+};
 
 export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) {
   const [copied, setCopied] = useState(false);
@@ -44,6 +57,29 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
     setIsDeleteModalOpen(false);
   };
 
+  const handlePin = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const store = useLinkStore.getState();
+    const pinnedCount = store.localLinks.filter(l => l.isPinned).length;
+    
+    if (!link.isPinned && pinnedCount >= 4) {
+      alert("You can only pin up to 4 links.");
+      return;
+    }
+    
+    store.togglePinLocalLink(link.id || link._id);
+    try {
+      await fetch(`/api/links/${link.id || link._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPinned: !link.isPinned }),
+      });
+    } catch (err) {
+      console.error(err);
+      store.togglePinLocalLink(link.id || link._id); // rollback on error
+    }
+  };
+
   const handleEditStart = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
@@ -72,10 +108,12 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
     setIsEditing(false);
   };
 
-  const formattedDate = new Date(link.createdAt).toLocaleDateString("en-US", {
+  const formattedDate = new Date(link.createdAt).toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 
   const highlightText = (text: string, highlight?: string) => {
@@ -135,12 +173,16 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
     <>
       <div 
         onClick={() => setIsModalOpen(true)}
-        className="group bg-white/5 dark:bg-black/20 backdrop-blur-md border border-white/10 dark:border-white/5 rounded-xl p-5 shadow-lg hover:border-indigo-500/30 transition-all flex flex-col relative overflow-hidden cursor-pointer"
+        className={`group backdrop-blur-md rounded-xl p-5 shadow-lg transition-all flex flex-col relative overflow-hidden cursor-pointer ${
+          link.isPinned 
+            ? 'bg-indigo-100/90 dark:bg-indigo-500/10 border-2 border-indigo-500 dark:border-indigo-500/50 hover:border-indigo-600 dark:hover:border-indigo-400/80' 
+            : 'bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 hover:border-indigo-500/30'
+        }`}
       >
         <div className="flex-1 min-w-0 z-10 pointer-events-none w-full flex flex-col justify-center">
           <div className="flex items-center justify-between gap-4 mb-2 pointer-events-auto">
             <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 truncate pointer-events-none">
-              {highlightText(link.title || link.url.replace(/^https?:\/\/(www\.)?/, ""), searchTerm)}
+              {highlightText(link.title || formatAutoTitle(link.url), searchTerm)}
             </h3>
             
             <div className="flex items-center space-x-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
@@ -151,10 +193,17 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               >
                 {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
+              <button
+                onClick={handlePin}
+                className={`p-1.5 rounded-md transition-colors ${link.isPinned ? 'text-indigo-500 dark:text-cyan-400 bg-indigo-500/10 dark:bg-cyan-400/10' : 'text-slate-400 hover:text-indigo-500 dark:hover:text-cyan-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'}`}
+                title={link.isPinned ? "Unpin Link" : "Pin Link"}
+              >
+                <Pin className="w-3.5 h-3.5" />
+              </button>
               {onEdit && (
                 <button
                   onClick={handleEditStart}
-                  className="p-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-cyan-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
+                  className="hidden sm:block p-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-cyan-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
                   title="Edit Link"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
@@ -163,7 +212,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               {onDelete && (
                 <button
                   onClick={handleDeleteClick}
-                  className="p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
+                  className="hidden sm:block p-1.5 text-slate-400 hover:text-red-500 dark:hover:text-red-400 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
                   title="Delete Link"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -208,7 +257,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 p-6"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 p-6 select-text"
             >
               <div className="bg-white dark:bg-slate-900 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 relative">
                 <button 
@@ -219,7 +268,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
                 </button>
                 
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white pr-8 mb-2">
-                  {highlightText(link.title || link.url.replace(/^https?:\/\/(www\.)?/, ""), searchTerm)}
+                  {highlightText(link.title || formatAutoTitle(link.url), searchTerm)}
                 </h2>
                 
                 <div className="flex items-center space-x-2 text-sm text-slate-500 dark:text-slate-400 mb-6">
@@ -252,6 +301,13 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
                     >
                       {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
                       Copy
+                    </button>
+                    <button
+                      onClick={handlePin}
+                      className={`p-2.5 rounded-xl transition-colors border border-slate-200 dark:border-white/10 ${link.isPinned ? 'text-indigo-600 dark:text-cyan-400 bg-indigo-50 dark:bg-cyan-400/10' : 'text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-cyan-400 bg-slate-100 hover:bg-indigo-50 dark:bg-white/5 dark:hover:bg-white/10'}`}
+                      title={link.isPinned ? "Unpin Link" : "Pin Link"}
+                    >
+                      <Pin className="w-5 h-5" />
                     </button>
                     {onEdit && (
                       <button
@@ -293,7 +349,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm z-[60] p-6"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm z-[60] p-6 select-text"
             >
               <div className="bg-white dark:bg-slate-900 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 relative flex flex-col items-center text-center">
                 <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-4">

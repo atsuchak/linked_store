@@ -8,7 +8,13 @@ import Link from "next/link";
 export function RecentLinks() {
   const { localLinks, removeLocalLink, updateLocalLink } = useLinkStore();
   
-  const recentLinks = localLinks.slice(0, 6);
+  const recentLinks = [...localLinks]
+    .sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    })
+    .slice(0, 6);
 
   if (recentLinks.length === 0) {
     return (
