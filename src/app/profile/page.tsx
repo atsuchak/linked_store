@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [loggingOutAll, setLoggingOutAll] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" }); // type: success | error
 
   useEffect(() => {
@@ -138,6 +139,25 @@ export default function ProfilePage() {
     }
   };
 
+  const logoutAllDevices = async () => {
+    if (!window.confirm("This will log you out from all devices, including this one. Continue?")) {
+      return;
+    }
+
+    setLoggingOutAll(true);
+    try {
+      const res = await fetch("/api/user/logout-all", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      alert("Logged out from all devices successfully.");
+      signOut({ callbackUrl: "/" });
+    } catch (error: any) {
+      showMessage(error.message || "Failed to logout from all devices", "error");
+      setLoggingOutAll(false);
+    }
+  };
+
   if (loading || status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -164,7 +184,7 @@ export default function ProfilePage() {
         )}
 
         <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
-          <div className="flex justify-between items-center mb-6 gap-2">
+          <div className="flex justify-between items-center mb-6 gap-2 mt-4">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">Profile Settings</h2>
             <button
               onClick={() => signOut()}
@@ -305,6 +325,27 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+        </div>
+
+        <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-indigo-500 dark:text-cyan-400" /> Active Sessions
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                Log out of all other devices you might have logged in from. You will also be logged out here.
+              </p>
+            </div>
+            <button
+              onClick={logoutAllDevices}
+              disabled={loggingOutAll}
+              className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-orange-500/10 text-slate-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 border border-slate-200 dark:border-white/10 hover:border-orange-500/30 rounded-xl font-medium transition-colors disabled:opacity-50 flex-shrink-0"
+            >
+              <LogOut className="w-5 h-5" />
+              {loggingOutAll ? "Logging out..." : "Logout All Devices"}
+            </button>
+          </div>
         </div>
 
         <div className="bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl">
