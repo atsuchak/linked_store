@@ -40,7 +40,7 @@ export function Navbar() {
             <ThemeToggle />
 
             {status === "loading" ? (
-              <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-white/10 animate-pulse ml-2" />
             ) : session ? (
               <div className="flex items-center space-x-2 sm:space-x-4 ml-2 sm:ml-4">
                 <Link 
@@ -65,7 +65,8 @@ export function Navbar() {
             ) : (
               <Link
                 href="/auth"
-                className="flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-600 hover:to-cyan-500 text-white text-sm font-medium transition-colors shadow-sm ml-2"
+                className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto sm:px-4 sm:py-2 space-x-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 hover:from-indigo-600 hover:to-cyan-500 text-white text-sm font-medium transition-colors shadow-sm ml-2"
+                aria-label="Sign In"
               >
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign In</span>
