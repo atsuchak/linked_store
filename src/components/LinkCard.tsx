@@ -257,9 +257,9 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 p-6 select-text"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50 p-4 sm:p-6 select-text flex flex-col justify-center"
             >
-              <div className="bg-white dark:bg-slate-900 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 relative">
+              <div className="bg-white dark:bg-slate-900 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] md:max-h-[85vh] p-5 sm:p-6 relative">
                 <button 
                   onClick={() => setIsModalOpen(false)}
                   className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-black/5 dark:bg-white/5 rounded-full transition-colors"
@@ -276,7 +276,7 @@ export function LinkCard({ link, onDelete, onEdit, searchTerm }: LinkCardProps) 
                 </div>
 
                 {link.description && (
-                  <div className="bg-slate-50 dark:bg-black/30 rounded-xl p-4 mb-6 border border-slate-100 dark:border-white/5">
+                  <div className="bg-slate-50 dark:bg-black/30 rounded-xl p-4 mb-6 border border-slate-100 dark:border-white/5 max-h-[250px] sm:max-h-[300px] md:max-h-[350px] overflow-y-auto">
                     <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed break-words">
                       {highlightText(link.description, searchTerm)}
                     </p>

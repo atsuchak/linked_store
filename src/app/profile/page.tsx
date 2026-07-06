@@ -358,6 +358,14 @@ export default function ProfilePage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-1">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Password</label>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={savingPassword}
+                      className="block sm:hidden text-xs font-medium text-indigo-600 dark:text-cyan-400 hover:underline transition-colors focus:outline-none"
+                    >
+                      Forgot Password?
+                    </button>
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -420,7 +428,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-0 mt-2 sm:mt-0">
               {isForgotPassword ? (
                 <button
                   type="button"
@@ -429,7 +437,7 @@ export default function ProfilePage() {
                     setOtpSent(false);
                     setOtp("");
                   }}
-                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-cyan-400 transition-colors"
+                  className="text-sm text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-cyan-400 transition-colors order-2 sm:order-1"
                 >
                   Cancel Reset
                 </button>
@@ -438,7 +446,7 @@ export default function ProfilePage() {
                   type="button"
                   onClick={handleSendOtp}
                   disabled={savingPassword}
-                  className="text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:underline transition-colors focus:outline-none"
+                  className="hidden sm:block text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:underline transition-colors focus:outline-none order-2 sm:order-1"
                 >
                   Forgot Password?
                 </button>
@@ -446,7 +454,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={savingPassword}
-                className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-medium transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl font-medium transition-colors disabled:opacity-50 order-1 sm:order-2"
               >
                 {savingPassword ? "Updating..." : "Update Password"}
               </button>
