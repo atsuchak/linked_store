@@ -13,8 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Linked Store",
+  title: "Link Base",
   description: "Store, manage, and find your important links instantly.",
+  icons: {
+    icon: [
+      { url: '/favicon-bg/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-bg/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-bg/favicon.ico' }
+    ],
+    apple: [
+      { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  manifest: '/favicon-bg/site.webmanifest',
 };
 
 import { Providers } from "@/components/Providers";
@@ -31,6 +42,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50`}
+        suppressHydrationWarning={true}
       >
         <Providers>
           <div className="flex flex-col min-h-screen relative">
