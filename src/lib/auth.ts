@@ -1,11 +1,16 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -21,8 +26,8 @@ export const authOptions: NextAuthOptions = {
 
         const user = await User.findOne({ email: credentials.email.toLowerCase() }).select('+password');
 
-        if (!user || !user.password) {
-          throw new Error('No user found with this email');
+        if (!user || !user.password || user.authProvider === 'google') {
+          throw new Error('Invalid email or password');
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
@@ -44,8 +49,38 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        if (!user.email) return false;
+        await connectDB();
+        const existingUser = await User.findOne({ email: user.email.toLowerCase() });
+        
+        if (existingUser && existingUser.authProvider === 'credentials') {
+          return '/auth?error=' + encodeURIComponent('An account already exists with this email. Please sign in with your password.');
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === 'google' && user) {
+        await connectDB();
+        let dbUser = await User.findOne({ email: user.email?.toLowerCase() });
+        if (!dbUser) {
+          dbUser = await User.create({
+            email: user.email?.toLowerCase(),
+            name: user.name,
+            image: user.image,
+            authProvider: 'google',
+          });
+        } else if ((!dbUser.image && user.image) || (!dbUser.name && user.name)) {
+          if (!dbUser.image && user.image) dbUser.image = user.image;
+          if (!dbUser.name && user.name) dbUser.name = user.name;
+          await dbUser.save();
+        }
+        token.id = dbUser._id.toString();
+        token.sessionVersion = dbUser.sessionVersion || 0;
+        console.log("JWT callback initialized for Google user:", token.id, "version:", token.sessionVersion);
+      } else if (user) {
         token.id = user.id;
         token.sessionVersion = (user as any).sessionVersion || 0;
         console.log("JWT callback initialized for user:", token.id, "version:", token.sessionVersion);
@@ -82,6 +117,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth',
+    error: '/auth',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
