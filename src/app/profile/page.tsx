@@ -292,7 +292,7 @@ export default function ProfilePage() {
                 />
               </div>
               <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{name || "Linked User"}</h3>
+                <h3 className="text-lg font-semibold text-slate-800 dark:text-white">{name || "Link User"}</h3>
                 <p className="text-sm text-slate-500 flex items-center justify-center sm:justify-start gap-1 mt-1">
                   <Mail className="w-3 h-3" /> {email}
                 </p>

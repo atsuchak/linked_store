@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.linksaver.app',
-  appName: 'Linked Store',
+  appName: 'Link Base',
   webDir: 'public',
   server: {
     // IMPORTANT: Replace this URL with your actual deployed app URL (e.g., https://linksaver.vercel.app)

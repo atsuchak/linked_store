@@ -10,7 +10,7 @@ export default function Home() {
       <div className="w-full max-w-5xl mx-auto flex flex-col items-center gap-6 sm:gap-12 z-10 my-auto pb-8 sm:pb-12 pt-4 sm:pt-8 flex-grow">
         <div className="text-center space-y-3 sm:space-y-4">
           <div className="hidden sm:inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold text-indigo-400 bg-white/5 dark:bg-black/20 backdrop-blur-md border border-white/10 mb-2">
-            Welcome to Linked Store
+            Welcome to Link Base
           </div>
           <h1 className="text-3xl sm:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 pb-2 px-2">
             Save Everything. Organize Anything.

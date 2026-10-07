@@ -1,9 +1,9 @@
-# Linked Store
+# Link Base
 
-A user-friendly web and mobile application designed to help you quickly save and manage your important links. Ever scrolled past an interesting post on Facebook or an article on Twitter, only to forget it later? Linked Store is here to solve that by providing a seamless, fast way to store your URLs so you can revisit them whenever you need.
+A user-friendly web and mobile application designed to help you quickly save and manage your important links. Ever scrolled past an interesting post on Facebook or an article on Twitter, only to forget it later? Link Base is here to solve that by providing a seamless, fast way to store your URLs so you can revisit them whenever you need.
 
-## Why Linked Store? 💡
-The internet is fast-paced, and it's easy to lose track of valuable content. **Linked Store prioritizes a smooth and effortless user experience**, allowing you to save links on the go, organize them efficiently, and access them across devices without missing a beat.
+## Why Link Base? 💡
+The internet is fast-paced, and it's easy to lose track of valuable content. **Link Base prioritizes a smooth and effortless user experience**, allowing you to save links on the go, organize them efficiently, and access them across devices without missing a beat.
 
 ## Tech Stack 🛠️
 
@@ -34,11 +34,11 @@ The internet is fast-paced, and it's easy to lose track of valuable content. **L
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/atsuchak/linked_store.git
+   git clone https://github.com/atsuchak/link-base.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd linked_store
+   cd link-base
    ```
 
 ### Installation & Setup
