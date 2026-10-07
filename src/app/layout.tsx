@@ -13,8 +13,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Link Base",
-  description: "Store, manage, and find your important links instantly.",
+  title: "Link Base - Save Everything. Organize Anything.",
+  description: "Store, manage, and find your important links instantly. A minimal, zero-friction bookmarking tool for everyone.",
+  keywords: ["link saver", "bookmark manager", "save links", "read it later", "productivity tool"],
+  openGraph: {
+    title: "Link Base - Your Personal Link Manager",
+    description: "Store, manage, and find your important links instantly without any hassle.",
+    url: "https://getlinkbase.vercel.app",
+    siteName: "Link Base",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Link Base Preview",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Link Base",
+    description: "Store, manage, and find your important links instantly.",
+    images: ["/og-image.jpg"],
+  },
   icons: {
     icon: [
       { url: '/favicon-bg/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
