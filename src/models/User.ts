@@ -9,6 +9,7 @@ export interface IUser extends Document {
   sessionVersion: number;
   createdAt: Date;
   historyOrder?: string[];
+  authProvider?: string;
 }
 
 const UserSchema: Schema = new Schema({
@@ -42,6 +43,11 @@ const UserSchema: Schema = new Schema({
   historyOrder: {
     type: [String],
     default: [],
+  },
+  authProvider: {
+    type: String,
+    enum: ['credentials', 'google'],
+    default: 'credentials',
   },
 });
 
