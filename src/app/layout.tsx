@@ -48,7 +48,11 @@ export const metadata: Metadata = {
       { url: '/favicon/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
-  manifest: '/favicon-bg/site.webmanifest',
+  manifest: '/manifest.json',
+};
+
+export const viewport = {
+  themeColor: "#020617",
 };
 
 import { Providers } from "@/components/Providers";
