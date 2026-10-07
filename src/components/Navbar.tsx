@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { useSession, signOut } from "next-auth/react";
-import { LogOut, User, History as HistoryIcon, Download } from "lucide-react";
+import { User, History as HistoryIcon, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function Navbar() {
@@ -27,7 +27,7 @@ export function Navbar() {
         <div className="flex justify-between h-14 sm:h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Linked <span className="text-indigo-500 dark:text-cyan-400">Store</span>
+              Link <span className="text-indigo-500 dark:text-cyan-400">Base</span>
             </Link>
           </div>
           
@@ -54,13 +54,6 @@ export function Navbar() {
                     <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                   )}
                 </Link>
-                <button
-                  onClick={() => signOut()}
-                  className="hidden sm:flex p-2 rounded-full hover:bg-red-500/10 text-red-500 transition-colors"
-                  aria-label="Log out"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
               </div>
             ) : (
               <Link
