@@ -24,6 +24,9 @@ export async function POST(req: Request) {
     // Check if user already exists (again, just in case)
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
+      if (existingUser.authProvider === 'google') {
+        return NextResponse.json({ message: 'Email is already registered. Please try logging in.' }, { status: 400 });
+      }
       return NextResponse.json({ message: 'User already exists' }, { status: 400 });
     }
 

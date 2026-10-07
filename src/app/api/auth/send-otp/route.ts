@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
 import Otp from '@/models/Otp';
-import { sendOTP } from '@/lib/nodemailer';
+import { sendOTP } from '@/lib/email';
 import dns from 'dns';
 
 // Force Google DNS to bypass ISP SRV blocking
@@ -22,11 +22,18 @@ export async function POST(req: Request) {
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     
     if (type === 'register' && existingUser) {
+      if (existingUser.authProvider === 'google') {
+        return NextResponse.json({ message: 'Email is already registered. Please try logging in.' }, { status: 400 });
+      }
       return NextResponse.json({ message: 'User already exists' }, { status: 400 });
     }
     
     if (type === 'reset' && !existingUser) {
       return NextResponse.json({ message: 'No account found with this email' }, { status: 404 });
+    }
+    
+    if (type === 'reset' && existingUser && existingUser.authProvider === 'google') {
+      return NextResponse.json({ message: 'Password reset is not available for this account type.' }, { status: 400 });
     }
 
     // Generate a 6 digit OTP
@@ -42,13 +49,13 @@ export async function POST(req: Request) {
     });
 
     // Check if SMTP is configured
-    if (!process.env.EMAIL_SERVER_PASSWORD || process.env.EMAIL_SERVER_PASSWORD === "your-app-password") {
-      console.log(`\n\n==========================================\n[DEV MODE] SMTP not configured.\nOTP for ${email} is: ${otpCode}\n==========================================\n\n`);
-      return NextResponse.json({ message: 'OTP logged to server console (SMTP not configured)' }, { status: 200 });
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "your-api-key") {
+      console.log(`\n\n==========================================\n[DEV MODE] Resend not configured.\nOTP for ${email} is: ${otpCode}\n==========================================\n\n`);
+      return NextResponse.json({ message: 'OTP logged to server console (Resend not configured)' }, { status: 200 });
     }
 
     // Send the OTP via email
-    await sendOTP(email, otpCode);
+    await sendOTP(email, otpCode, type as 'register' | 'reset');
 
     return NextResponse.json({ message: 'OTP sent successfully' }, { status: 200 });
   } catch (error: any) {

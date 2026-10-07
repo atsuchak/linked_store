@@ -41,6 +41,13 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
+    
+    if (user.authProvider === 'google') {
+      return NextResponse.json(
+        { message: "Password reset is not available for this account type." },
+        { status: 400 }
+      );
+    }
 
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 12);
